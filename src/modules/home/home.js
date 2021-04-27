@@ -8,11 +8,11 @@ import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Button from "react-bootstrap/Button";
 import ShoppingCart from "../common/ShoppingCart";
-import {isEmpty} from "../utils/util";
 
 function Home(props) {
   const [profilePage, showProfilePage] = useState(false);
   const [newProductDetailModal, showNewProductDetailModal] = useState(false);
+  const [userData, setUserData] = useState(props.userData);
   const [userName, setUserName] = useState(props.userData.userName);
   const [openProductDetail, setOpenProductDetail] = useState(false);
   const [product, setProduct] = useState(null);
@@ -24,7 +24,7 @@ function Home(props) {
     showProfilePage(true);
     showNewProductDetailModal(false);
   }
-  const displayProductDetailModal = () => {
+  const displayNewProductModal = () => {
     setRefreshHome(false);
     showNewProductDetailModal(true);
     showProfilePage(false);
@@ -48,10 +48,13 @@ function Home(props) {
           <Form inline>
             <FormControl type="text" placeholder="Search" className="mr-sm-2"/>
             <Button variant="outline-success" className="mr-sm-2">Search</Button>
-            <Button onClick={() => {setShowCart(true); setRefreshHome(false)}} variant="outline-info">Shopping Cart</Button>
+            <Button onClick={() => {
+              setShowCart(true);
+              setRefreshHome(false)
+            }} variant="outline-info">Shopping Cart</Button>
             <NavDropdown title="More.." id="basic-nav-dropdown" style={{paddingRight: 300}}>
               <NavDropdown.Item onClick={() => displayProfilePage()}>Profile</NavDropdown.Item>
-              <NavDropdown.Item onClick={() => displayProductDetailModal()}>Add Product</NavDropdown.Item>
+              {userData.contributor && <NavDropdown.Item onClick={() => displayNewProductModal()}>Add Product</NavDropdown.Item>}
               <NavDropdown.Item href="#/action-2">Order History</NavDropdown.Item>
               <NavDropdown.Divider/>
               <NavDropdown.Item onClick={props.logout}>Log out</NavDropdown.Item>
@@ -60,26 +63,31 @@ function Home(props) {
         </Navbar.Collapse>
       </Navbar>
       <div style={{width: "100%", height: "100%", paddingTop: 10}}>
-        {profilePage && <UserProfile userData={props.userData} closeProfile={() => showProfilePage(false)}
+        {profilePage && <UserProfile userData={userData} closeProfile={(userData) => {
+          showProfilePage(false);
+          setUserData(userData);
+          setRefreshHome(true)
+        }}
                                      updateUserName={(value) => setUserName(value)}/>}
         {newProductDetailModal &&
-        <ProductDetail userId={props.userData.userID} closeDetail={() => {
+        <ProductDetail userId={userData.userID} closeDetail={() => {
           showNewProductDetailModal(false);
           setRefreshHome(true);
         }}
                        isEditable={true}
                        isNew={true}/>}
         {openProductDetail &&
-        <ProductDetail userId={props.userData.userID} product={product} closeDetail={() => {
+        <ProductDetail userId={userData.userID} product={product} closeDetail={() => {
           setOpenProductDetail(false);
           setRefreshHome(true);
         }}
                        isEditable={false}
                        isNew={false}/>}
-        {refreshHome && <AllProducts openProductDetail={(product) => openProductDetailModal(product)}/>}
-        {showCart && <ShoppingCart closeCart={() => {setShowCart(false);
+        {refreshHome && <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}/>}
+        {showCart && <ShoppingCart closeCart={() => {
+          setShowCart(false);
           setRefreshHome(true);
-        }} userID={props.userData.userID}/>}
+        }} userID={userData.userID}/>}
 
       </div>
     </div>

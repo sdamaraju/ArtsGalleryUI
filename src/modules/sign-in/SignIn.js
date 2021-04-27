@@ -3,6 +3,8 @@ import signInImage from "../../assets/images/PaintingsCollage.png";
 import Home from "../home/home";
 import {isEmpty} from "../utils/util";
 import {serverURL} from "../../app.constants"
+import SignUp from "./SignUp";
+import Button from "react-bootstrap/Button";
 
 const SignIn = (props) => {
   const [loginID, setLoginID] = useState("");
@@ -10,7 +12,8 @@ const SignIn = (props) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userData, setUserData] = useState({});
   const [failedLogin, setFailedLogIn] = useState(false);
-
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+console.log(showSignUpModal);
   //Remove this..just for test
   useEffect(() => {
     setLoginID("sdamaraju");
@@ -57,11 +60,8 @@ const SignIn = (props) => {
             color: "white"
           }}> Welcome to Art Gallery </h1>
         )}
-        {!loggedIn && (
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            await login()
-          }}>
+        {!loggedIn && !showSignUpModal && (
+          <form>
             <label>
               <input placeholder={"Log In ID"} type="text" value={loginID} style={{height: 30, width: 200}}
                      onChange={(event) => setLoginID(event.target.value)} required={true}/><br/>
@@ -69,10 +69,18 @@ const SignIn = (props) => {
                      onChange={(event) => setPassword(event.target.value)} required={true}/><br/>
             </label>
             <br/>
-            <input type="submit" value="Sign In" style={{height: 30, width: 200}}/>
+            <Button onClick={async (event) => {
+              event.preventDefault();
+              await login();
+            }} variant="primary">Sign in</Button>
+            <Button onClick={() => {
+              setShowSignUpModal(true);
+              console.log("Wassup..")
+            }} variant="secondary">Sign up</Button>
           </form>
         )}
         {failedLogin && <text style={{color: "Red"}}> Username/password did not match</text>}
+        {showSignUpModal && <SignUp closeSignUpModal={() => setShowSignUpModal(false)}/>}
         {loggedIn && <Home userData={userData} logout={() => logout()}/>}
       </div>
     </div>

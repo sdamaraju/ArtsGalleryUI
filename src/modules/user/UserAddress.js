@@ -14,17 +14,17 @@ function UserAddress(props) {
   const [country, setCountry] = useState(!isEmpty(addrData) ? addrData.country : "");
   const [userid, setUserid] = useState(!isEmpty(addrData) ? addrData.userid : "");
   const [aid, setAid] = useState(!isEmpty(addrData) ? addrData.aid : "");
-  const [status, setStatus] = useState(!isEmpty(addrData) ? addrData.status : "");
+  const [status, setStatus] = useState(!isEmpty(addrData) ? addrData.status : "PRIMARY");
   const isEditable = props.isEditable;
 
   useEffect(async () => {
     if (isEmpty(addrData)) {
       let url = `${serverURL}/address?userID=${encodeURIComponent(props.userId)}&status=${encodeURIComponent(
         "PRIMARY")}`
-    await  fetch(url, {
+      await fetch(url, {
         method: 'GET'
       }).then(resp => resp.json()).then((data) => {
-        setAddrData(data);
+        if (isEmpty(data.error)) setAddrData(data);
       });
     }
   }, [props.userId]);
@@ -40,13 +40,14 @@ function UserAddress(props) {
           city: city,
           stateInCountry: stateInCountry,
           country: country,
-          zipCode:zipCode,
-          status:status,
-          aid:aid,
+          zipCode: zipCode,
+          status: status,
+          userid: props.userId,
+          aid: aid,
         })
       };
       let url = `${serverURL}/address`
-     await fetch(url, requestOptions).then(resp => resp.json()).then((data) => {
+      await fetch(url, requestOptions).then(resp => resp.json()).then((data) => {
         setAddrData(data);
       });
       props.resetSaveCalled();

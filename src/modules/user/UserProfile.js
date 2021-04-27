@@ -17,9 +17,12 @@ function UserProfile(props) {
   const [photo, setPhoto] = useState(props.userData.photo)
   const [selectedFile, setSelectedFile] = useState(null);
   const [saveCalled, setSaveCalled] = useState(false);
+  const [userData, setUserData] = useState(false);
+  const [contributor, setContributor] = useState(props.userData.contributor);
   //const [photoType,setPhotoType] = useState(""); Might have to revisit photoType for other than png photos..
 
   const saveUser = () => {
+    console.log("Hello", contributor);
     setSaveCalled(true);
     if (password !== confirmPassword) {
       alert("Password and Confirmation Password did not match");
@@ -37,12 +40,14 @@ function UserProfile(props) {
           phoneNumber: phoneNumber,
           password: password,
           loginID: loginID,
+          contributor: contributor,
         })
       };
       fetch(`${serverURL}/user`, requestOptions)
         .then(response => response.json())
         .then(data => {
           //alert("Profile updated successfully.");
+          setUserData(data);
           props.updateUserName(data.userName);
         })
         .catch((error) => {
@@ -189,7 +194,22 @@ function UserProfile(props) {
                        readOnly={!isEditable}/>
               </div>
             </div>}
-            <UserAddress userId={props.userData.userID} isEditable={isEditable} save={saveCalled} resetSaveCalled={() => setSaveCalled(false)}/>
+            <div className="row" style={{padding: 5}}>
+              <div className="col-md-6">
+                <label>Are you an artist ?</label>
+              </div>
+              <div className="col-md-6">
+                <input type="checkbox"
+                       checked={contributor}
+                       onClick={(event) => {
+                         console.log("test123",!contributor);
+                         setContributor(!contributor)
+                       }} style={UserProfileStyles.checkBoxComp}
+                       required={true}/>
+              </div>
+            </div>
+            <UserAddress userId={props.userData.userID} isEditable={isEditable} save={saveCalled}
+                         resetSaveCalled={() => setSaveCalled(false)}/>
           </div>
           <div className="col-md-1">
             {!isEditable &&
@@ -207,7 +227,7 @@ function UserProfile(props) {
           <div className={"col-md-1"}>
             <CloseButton onClick={() => {
               setIsEditable(false);
-              props.closeProfile()
+              props.closeProfile(!isEmpty(userData) ? userData : props.userData);
             }}/>
           </div>
         </div>

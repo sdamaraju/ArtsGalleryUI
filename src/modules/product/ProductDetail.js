@@ -6,11 +6,10 @@ import insertImage from "../../assets/images/insertImage.png"
 import {serverURL} from "../../app.constants";
 import {productCategories} from "../../app.constants";
 import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
 
 
 function ProductDetail(props) {
-  const [isEditEnabled, setIsEditEnabled] = useState(true);
+  const [isEditEnabled, setIsEditEnabled] = useState(false);
   const [isEditable, setIsEditable] = useState(props.isEditable);
   const [prodData, setProdData] = useState(null);
   const [title, setTitle] = useState(!isEmpty(prodData) ? prodData.title : "");
@@ -51,10 +50,10 @@ function ProductDetail(props) {
 
   useEffect(async () => {
     if (!isEmpty(props.product)) {
+      if (props.product.ownerID == props.userId) setIsEditEnabled(true);
+      else setIsEditEnabled(false);
       if (!isStale) {
         setProdData(props.product);
-        if (props.product.ownerID == props.userId) setIsEditEnabled(true);
-        else setIsEditEnabled(false);
       }
       else {
         let url = `${serverURL}/product?productID=${encodeURIComponent(props.product.productID)}`
@@ -66,6 +65,8 @@ function ProductDetail(props) {
         });
         setIsStale(false);
       }
+    } else {
+      setIsEditEnabled(true);
     }
     if (!props.isNew) await getInventory();
     if (isEmpty(ownerName)) {

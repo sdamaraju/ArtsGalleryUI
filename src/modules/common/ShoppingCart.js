@@ -77,14 +77,14 @@ function ShoppingCart(props) {
         <div className="col" style={{justifyContent: "center"}}>
           <img style={{height: 50, width: 50}} src={`data:image/png;base64,${item.image}`}/>
         </div>
-        <div className="col" style={{justifyContent: "center", width: 150, fontSize: 20}}>
+        <div className="col-md-4" style={{justifyContent: "center", width: 150, fontSize: 20}}>
           {item.title}
         </div>
         <div className="col" style={{justifyContent: "center", width: 150, fontSize: 20}}>
           {item.price+' $'}
         </div>
         <div className="col" style={{justifyContent: "center"}}>
-          <input type={"text"} onChange={(event) => updateCartQuantity(event.target.value, item, row)}
+          <input type={"text"} onChange={(event) => updateCartQuantity(event.target.value, item)}
                  value={item.quantity} style={{fontSize: 20, border: 1, width: "100%"}} readOnly={false}/>
         </div>
         <div className="col" style={{justifyContent: "center"}}>

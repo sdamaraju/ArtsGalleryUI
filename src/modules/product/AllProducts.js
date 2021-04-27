@@ -8,7 +8,7 @@ function AllProducts(props) {
 
   useEffect(async () => {
     if (isEmpty(data)) {
-      await fetch(`${serverURL}/products`)
+      await fetch(`${serverURL}/products?userID=${encodeURIComponent(props.userID)}`)
         .then(response => response.json())
         .then(data => {
           if (!data.error) {
