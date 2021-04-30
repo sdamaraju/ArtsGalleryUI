@@ -8,3 +8,7 @@ export const isEmpty = (value) => {
   else if (!value) return true;
   return false;
 };
+
+export const rowStyle = (row, rowIndex) => {
+  return {overflowWrap: 'break-word'};
+};

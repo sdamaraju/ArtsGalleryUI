@@ -8,6 +8,7 @@ import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Button from "react-bootstrap/Button";
 import ShoppingCart from "../common/ShoppingCart";
+import Transactions from "../Orders/Transaction";
 
 function Home(props) {
   const [profilePage, showProfilePage] = useState(false);
@@ -17,6 +18,7 @@ function Home(props) {
   const [openProductDetail, setOpenProductDetail] = useState(false);
   const [product, setProduct] = useState(null);
   const [showCart, setShowCart] = useState(false);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [refreshHome, setRefreshHome] = useState(true);
 
   const displayProfilePage = () => {
@@ -28,6 +30,13 @@ function Home(props) {
     setRefreshHome(false);
     showNewProductDetailModal(true);
     showProfilePage(false);
+  }
+
+  const displayAllOrders = () => {
+    setRefreshHome(false);
+    setShowOrderHistory(true);
+    showProfilePage(false);
+    showNewProductDetailModal(false);
   }
 
   const openProductDetailModal = (product) => {
@@ -54,8 +63,9 @@ function Home(props) {
             }} variant="outline-info">Shopping Cart</Button>
             <NavDropdown title="More.." id="basic-nav-dropdown" style={{paddingRight: 300}}>
               <NavDropdown.Item onClick={() => displayProfilePage()}>Profile</NavDropdown.Item>
-              {userData.contributor && <NavDropdown.Item onClick={() => displayNewProductModal()}>Add Product</NavDropdown.Item>}
-              <NavDropdown.Item href="#/action-2">Order History</NavDropdown.Item>
+              {userData.contributor &&
+              <NavDropdown.Item onClick={() => displayNewProductModal()}>Add Product</NavDropdown.Item>}
+              <NavDropdown.Item onClick={() => displayAllOrders()}>Order History</NavDropdown.Item>
               <NavDropdown.Divider/>
               <NavDropdown.Item onClick={props.logout}>Log out</NavDropdown.Item>
             </NavDropdown>
@@ -83,11 +93,17 @@ function Home(props) {
         }}
                        isEditable={false}
                        isNew={false}/>}
-        {refreshHome && <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}/>}
+        {refreshHome &&
+        <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}/>}
         {showCart && <ShoppingCart closeCart={() => {
           setShowCart(false);
           setRefreshHome(true);
-        }} userID={userData.userID}/>}
+        }} userID={userData.userID} userName={userData.loginID}/>}
+
+        {showOrderHistory && <Transactions userID={userData.userID} closeTransactions={() => {
+          setShowOrderHistory(false);
+          setRefreshHome(true);
+        }}/>}
 
       </div>
     </div>
