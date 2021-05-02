@@ -1,78 +1,131 @@
 import React, {useEffect, useState} from "react";
 import {serverURL} from "../../app.constants";
 import {isEmpty} from "../utils/util";
+import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
+import "../styles/box.css"
+import SearchDetail from "../search/SearchDetail";
 
 function AllProducts(props) {
-  const [data, setData] = useState("");
-  const [rows, setRows] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [searchEnabled, setSearchEnabled] = useState(props.searchEnabled);
+  const [stringSearchCriteria, setStringSearchCriteria] = useState(props.filterCriteria);
+  const [customSearch, setCustomSearch] = useState(false);
 
   useEffect(async () => {
-    if (isEmpty(data)) {
-      await fetch(`${serverURL}/products?userID=${encodeURIComponent(props.userID)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (!data.error) {
-            setData(data);
-            createItemList(data);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          alert(error);
-        });
+    if (!customSearch) {
+      if (!searchEnabled || (searchEnabled && isEmpty(stringSearchCriteria))) {
+        await getAllProducts();
+      }
+      else if (searchEnabled && !isEmpty(stringSearchCriteria)) await searchProductsByString(stringSearchCriteria);
     }
-  }, []);
+  }, [customSearch]);
 
-  const createItemList = (data) => {
-    setRows([]);
-    let counter = 1
-    data.forEach((item, idx) => {
-      rows[counter] = rows[counter] ? [...rows[counter]] : []
-      if (idx % 4 === 0 && idx !== 0) {
-        counter++
-        rows[counter] = rows[counter] ? [...rows[counter]] : []
-        rows[counter].push(item)
-      }
-      else {
-        rows[counter].push(item)
-      }
-    })
-    setRows(rows);
-    return rows;
+  const getAllProducts = async () => {
+    await fetch(`${serverURL}/products?userID=${encodeURIComponent(234234)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.error) {
+          setProducts(data);
+        } else {
+          alert("All available products are in your shopping cart, please review cart and proceed to checkout.")
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error);
+      });
   }
 
-  const renderItem = (item) => {
+  const runSearchDetail = async (searchData) => {
+    //let url = `${serverURL}/productsDetailSearch?priceMinimum=${searchData.priceMinimum}&priceMaximum=${searchData.priceMaximum}&artist=${isEmpty(searchData.artist) ? "EMPTY" : searchData.artist}&description=${isEmpty(searchData.description) ? "EMPTY" : searchData.description}&title=${isEmpty(searchData.title) ? "EMPTY" : searchData.title}&category=${isEmpty(searchData.category) ? "EMPTY" : searchData.category}&sortPriceHighToLow=${searchData.sortPriceHighToLow}&sortPriceLowToHigh=${searchData.sortPriceLowToHigh}`;
+    let url = `${serverURL}/productsDetailSearch?priceMinimum=${searchData.priceMinimum < 0 ? 0 : searchData.priceMinimum}&priceMaximum=${searchData.priceMaximum <= 0 ? 100000 : searchData.priceMaximum}&artist=${searchData.artist}&description=${searchData.description}&title=${searchData.title}&category=${searchData.category}&sortPriceHighToLow=${searchData.sortPriceHighToLow}&sortPriceLowToHigh=${searchData.sortPriceLowToHigh}`;
+    console.log(url);
+    await fetch(url)
+      .then(response => response.json())
+      .then(async(data) => {
+        if (!data.error) {
+          setProducts(data);
+        }
+        else {
+          await getAllProducts();
+          alert("No results found, please refine your search")
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error);
+      });
+  }
+
+  const searchProductsByString = async (stringSearchCriteria) => {
+    setProducts([]);
+    await fetch(`${serverURL}/productsSearchString?searchString=${encodeURIComponent(stringSearchCriteria)}`)
+      .then(response => response.json())
+      .then(async(data) => {
+        if (data.error) {
+          await getAllProducts();
+          alert("Search did not return results, please refine your search criteria")
+        }else {
+          setProducts(data);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error);
+      });
+  }
+
+  const renderProduct = (product) => {
     return (
-      <div style={{padding: 10}} className={"col"}>
-        <div className="row" style={{justifyContent: "center"}}><img onClick={() => {
-          props.openProductDetail(item)
-        }} style={{height: 260, width: 240, paddingBottom: 10}}
-                                                                     src={`data:image/png;base64,${item.image}`}/></div>
-        <div className="row" style={{justifyContent: "center"}}>{item.title}</div>
-        {/*<div className="row" style={{justifyContent: "center"}}>Description : {item.description}</div>*/}
-        <div className="row" style={{justifyContent: "center"}}>{item.price + ' $'}</div>
-        <div className="row" style={{justifyContent: "center"}}>{item.category}</div>
-      </div>
+      <Card style={{width: '18rem'}} className="box box1">
+        <Card.Img onClick={() => props.openProductDetail(product)} style={{height: 300}} variant="top"
+                  src={`data
+:
+image / png;
+base64,${product.image}`}/>
+        <Card.Body>
+          <Card.Title>{product.title}</Card.Title>
+          {product.description && (
+            <Card.Text>
+              {product.description.length > 100 ? product.description.substr(0, 75) : product.description}
+            </Card.Text>
+          )}
+          <Card.Text>
+            {product.category}
+          </Card.Text>
+          <Card.Text>
+            {product.price + ' $'}
+          </Card.Text>
+          <Button onClick={() => {
+            props.openProductDetail(product)
+          }} variant="outline-info">Add to cart</Button>
+        </Card.Body>
+      </Card>
     );
   }
 
   return (
-    <section className="section items">
-      {!isEmpty(rows) && <div style={{backgroundColor: "white"}} className="container">
-        {Object.keys(rows).map(row => {
-          return (
-            <div className="row" key={row} style={{padding: 10, alignItems: 'center'}}>
-              {rows[row].map(item => {
-                return (
-                  renderItem(item)
-                )
-              })}
+    <div>
+      {!isEmpty(products) && (
+        <div>
+          {searchEnabled && <div className="row">
+            <div className="col" style={{backgroundColor: 'grey'}}>
+              <SearchDetail searchDetail={async (searchData) => await runSearchDetail(searchData)}
+                            customSearch={(value) => {
+                              setCustomSearch(value)
+                            }}/>
             </div>
-          );
-        })
-        }
-      </div>}
-    </section>
+            <div className="col-md-8" style={{marginRight: 30}}>
+              <div className="grid">{products.map((product) => renderProduct(product))}</div>
+            </div>
+          </div>}
+          {!searchEnabled &&
+          <div className="grid" style={{margin: 30}}>{products.map((product) => renderProduct(product))}</div>}
+        </div>
+      )}
+      {isEmpty(products) && <h2>No Products Found</h2>}
+    </div>
   );
 }
 

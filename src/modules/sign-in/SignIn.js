@@ -13,7 +13,7 @@ const SignIn = (props) => {
   const [userData, setUserData] = useState({});
   const [failedLogin, setFailedLogIn] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
-console.log(showSignUpModal);
+
   //Remove this..just for test
   useEffect(() => {
     setLoginID("sdamaraju");
@@ -47,16 +47,13 @@ console.log(showSignUpModal);
 
   return (
     <div style={{
-      backgroundImage: `url(${signInImage})`,
-      backgroundSize: 'cover',
-      width: '100vw',
-      height: '100vh',
+      backgroundColor:'pink',
     }}>
       <div style={{top: 1000}}>
         {!loggedIn && (
           <h1 style={{
             fontStyle: "",
-            backgroundColor: "black",
+            backgroundColor: "pink",
             color: "white"
           }}> Welcome to Art Gallery </h1>
         )}

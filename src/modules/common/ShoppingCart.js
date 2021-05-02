@@ -254,13 +254,13 @@ function ShoppingCart(props) {
     return {};
   }
 
-  const updateTransaction = async (orderData) => {
-    if (isEmpty(orderData)) return {}
+  const updateTransaction = async (orderID) => {
+    if (isEmpty(orderID)) return {}
     const requestOptions = {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        orderID: orderData.orderID,
+        orderID: orderID,
         userID: props.userID,
         paymentMethod: paymentMethod,
         status: status,

@@ -251,7 +251,7 @@ function ProductDetail(props) {
                   <img style={{height: 180, width: 200, paddingBottom: 10}} src={insertImage}/>}
                   {!isEmpty(image) &&
                   <img style={{height: 300, width: 300, paddingBottom: 10}} src={`data:image/png;base64,${image}`}/>}
-                  {isEditEnabled && <div style={{paddingBottom: 5}}>
+                  {!isEmpty(productID) && isEditEnabled && <div style={{paddingBottom: 5}}>
                     <button type="button" onClick={() => setChangeImage(true)} className="btn btn-secondary">
                       {isEmpty(image) ? "Add Image" : "Change Image"}
                     </button>

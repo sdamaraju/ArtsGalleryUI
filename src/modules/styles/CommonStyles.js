@@ -13,6 +13,13 @@ const CommonStyles = ({
     justifyContent: "center",
   },
 
-});
+  searchField: {
+    fontFamily: 'cursive',
+    color: "pink",
+    fontSize: 25
+  },
+
+})
+;
 
 export default CommonStyles;

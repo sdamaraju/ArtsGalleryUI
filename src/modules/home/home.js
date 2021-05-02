@@ -20,6 +20,10 @@ function Home(props) {
   const [showCart, setShowCart] = useState(false);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [refreshHome, setRefreshHome] = useState(true);
+  const [enableSearch, setEnableSearch] = useState(false);
+  const [filterCriteria, setFilterCriteria] = useState("")
+  console.log("test1",enableSearch)
+
 
   const displayProfilePage = () => {
     setRefreshHome(false);
@@ -48,20 +52,27 @@ function Home(props) {
   return (
     <div>
       <Navbar bg="light" expand="lg">
-        <Navbar.Brand>Art-Gallery</Navbar.Brand>
+        <Navbar.Brand style={{fontSize: 25}}>Art-Gallery</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
             <h3>Welcome back {userName} !</h3>
           </Nav>
           <Form inline>
-            <FormControl type="text" placeholder="Search" className="mr-sm-2"/>
-            <Button variant="outline-success" className="mr-sm-2">Search</Button>
+            <input style={{width: 400}} type="text" placeholder="search here: let's say Meenakari"
+                   onChange={(event) => setFilterCriteria(event.target.value)}
+                   className="mr-sm-2" readOnly={enableSearch}/>
+            {!enableSearch && <Button variant="outline-info" className="mr-sm-2" onClick={() => {
+              setEnableSearch(true);
+            }}>Search</Button>}
+            {enableSearch && <Button variant="outline-info" className="mr-sm-2" onClick={() => {
+              setEnableSearch(false);
+            }}>Cancel Search</Button>}
             <Button onClick={() => {
               setShowCart(true);
               setRefreshHome(false)
             }} variant="outline-info">Shopping Cart</Button>
-            <NavDropdown title="More.." id="basic-nav-dropdown" style={{paddingRight: 300}}>
+            <NavDropdown title="More options.." id="basic-nav-dropdown" style={{paddingRight: 100}}>
               <NavDropdown.Item onClick={() => displayProfilePage()}>Profile</NavDropdown.Item>
               {userData.contributor &&
               <NavDropdown.Item onClick={() => displayNewProductModal()}>Add Product</NavDropdown.Item>}
@@ -72,29 +83,33 @@ function Home(props) {
           </Form>
         </Navbar.Collapse>
       </Navbar>
-      <div style={{width: "100%", height: "100%", paddingTop: 10}}>
+      <div style={{width: "100%", height: "100%"}}>
         {profilePage && <UserProfile userData={userData} closeProfile={(userData) => {
           showProfilePage(false);
           setUserData(userData);
           setRefreshHome(true)
-        }}
-                                     updateUserName={(value) => setUserName(value)}/>}
+        }} updateUserName={(value) => setUserName(value)}/>}
+
         {newProductDetailModal &&
         <ProductDetail userId={userData.userID} closeDetail={() => {
           showNewProductDetailModal(false);
           setRefreshHome(true);
-        }}
-                       isEditable={true}
-                       isNew={true}/>}
+        }} isEditable={true} isNew={true}/>}
+
         {openProductDetail &&
         <ProductDetail userId={userData.userID} product={product} closeDetail={() => {
           setOpenProductDetail(false);
           setRefreshHome(true);
-        }}
-                       isEditable={false}
-                       isNew={false}/>}
-        {refreshHome &&
-        <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}/>}
+        }} isEditable={false} isNew={false}/>}
+
+        {refreshHome && enableSearch &&
+        <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}
+                     searchEnabled={enableSearch} filterCriteria={filterCriteria} />}
+
+        {refreshHome && !enableSearch &&
+        <AllProducts openProductDetail={(product) => openProductDetailModal(product)} userID={userData.userID}
+                     searchEnabled={enableSearch} filterCriteria={filterCriteria} />}
+
         {showCart && <ShoppingCart closeCart={() => {
           setShowCart(false);
           setRefreshHome(true);
