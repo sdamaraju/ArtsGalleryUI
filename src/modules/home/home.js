@@ -91,13 +91,13 @@ function Home(props) {
         }} updateUserName={(value) => setUserName(value)}/>}
 
         {newProductDetailModal &&
-        <ProductDetail userId={userData.userID} closeDetail={() => {
+        <ProductDetail userID={userData.userID} closeDetail={() => {
           showNewProductDetailModal(false);
           setRefreshHome(true);
         }} isEditable={true} isNew={true}/>}
 
         {openProductDetail &&
-        <ProductDetail userId={userData.userID} product={product} closeDetail={() => {
+        <ProductDetail userID={userData.userID} product={product} closeDetail={() => {
           setOpenProductDetail(false);
           setRefreshHome(true);
         }} isEditable={false} isNew={false}/>}

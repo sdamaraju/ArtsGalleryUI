@@ -6,6 +6,10 @@ import insertImage from "../../assets/images/insertImage.png"
 import {serverURL} from "../../app.constants";
 import {productCategories} from "../../app.constants";
 import Modal from "react-bootstrap/Modal";
+import Comments from "../comments/Comments";
+import Card from "react-bootstrap/Card";
+import Dropdown from "react-dropdown";
+import Button from "react-bootstrap/Button";
 
 
 function ProductDetail(props) {
@@ -15,7 +19,7 @@ function ProductDetail(props) {
   const [title, setTitle] = useState(!isEmpty(prodData) ? prodData.title : "");
   const [description, setDescription] = useState(!isEmpty(prodData) ? prodData.description : "");
   const [price, setPrice] = useState(!isEmpty(prodData) ? prodData.price : "");
-  const ownerID = props.userId;
+  const ownerID = props.userID;
   const [image, setImage] = useState(!isEmpty(prodData) ? prodData.image : "");
   const [category, setCategory] = useState(!isEmpty(prodData) ? prodData.category : "");
   const [productID, setProductID] = useState(!isEmpty(prodData) ? prodData.productID : "")
@@ -25,6 +29,9 @@ function ProductDetail(props) {
   const [quantity, setQuantity] = useState(1);
   const [inventory, setInventory] = useState(1);
   const [isStale, setIsStale] = useState(true);
+  const [showComments, setShowComments] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [prevRating, setPrevRating] = useState(0);
   let categoriesList = productCategories.map((item, i) => {
     return (
       <option key={i} value={item}>{item}</option>
@@ -50,22 +57,25 @@ function ProductDetail(props) {
 
   useEffect(async () => {
     if (!isEmpty(props.product)) {
-      if (props.product.ownerID == props.userId) setIsEditEnabled(true);
+      if (props.product.ownerID == props.userID) setIsEditEnabled(true);
       else setIsEditEnabled(false);
       if (!isStale) {
         setProdData(props.product);
+        await loadRating(props.product.productID);
       }
       else {
         let url = `${serverURL}/product?productID=${encodeURIComponent(props.product.productID)}`
-        await fetch(url).then(response => response.json()).then((data) => {
+        await fetch(url).then(response => response.json()).then(async(data) => {
           setProdData(data);
+          await loadRating(data.productID);
         }).catch((error) => {
           console.log(error);
           alert(error + "\nLooks like the server is down, please try after sometime.");
         });
         setIsStale(false);
       }
-    } else {
+    }
+    else {
       setIsEditEnabled(true);
     }
     if (!props.isNew) await getInventory();
@@ -84,7 +94,6 @@ function ProductDetail(props) {
       });
     }
   }, []);
-
 
   useEffect(async () => {
     if (!isEmpty(prodData)) {
@@ -126,14 +135,14 @@ function ProductDetail(props) {
         title: title,
         price: price,
         description: description,
-        ownerID: props.userId,
+        ownerID: props.userID,
         category: category == "" ? productCategories[0] : category,
       }) : JSON.stringify({
         productID: productID,
         title: title,
         price: price,
         description: description,
-        ownerID: props.userId,
+        ownerID: props.userID,
         category: category == "" ? productCategories[0] : category,
       })
     };
@@ -153,6 +162,33 @@ function ProductDetail(props) {
     setIsEditable(false);
     setChangeImage(false);
     setIsStale(true);
+  }
+
+  const loadRating = async (productID) => {
+    fetch(`${serverURL}/rating?productID=${productID}&userID=${props.userID}`)
+      .then(response => response.json())
+      .then(async (data) => {
+        setRating(data.rating)
+        setPrevRating(data.rating)
+      })
+      .catch((error) => {
+        console.log(error)
+        alert(error);
+      });
+  }
+
+  const updateRating = async (ratingValue) => {
+    let requestOptions = {method: (prevRating == 0) ? 'POST' : 'PUT'}
+    fetch(`${serverURL}/rating?productID=${productID}&userID=${props.userID}&rating=${ratingValue}`,requestOptions)
+      .then(response => response.json())
+      .then(async (data) => {
+        await loadRating(productID);
+        setPrevRating(ratingValue);
+      })
+      .catch((error) => {
+        console.log(error)
+        alert(error);
+      });
   }
 
   async function uploadProductImage() {
@@ -193,14 +229,13 @@ function ProductDetail(props) {
   }
 
   async function addToCart() {
-    console.log(productID, quantity, props.userId)
     const requestOptionsForCart = {
       method: "POST",
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         productID: productID,
         quantity: quantity,
-        userID: props.userId
+        userID: props.userID
       })
     };
     console.log(requestOptionsForCart.body)
@@ -276,6 +311,32 @@ function ProductDetail(props) {
                   </div>
                   }
                 </div>
+                <div style={{paddingTop: 10}}>
+                  <Card style={{width: 300}}>
+                    <Card.Header style={{height: 50}}>
+                      <div className="row">
+                        <div className="col">
+                          <Card.Title>Your Rating</Card.Title>
+                        </div>
+                        <div className="col" className="align-right" style={{paddingRight: 5, paddingBotton: 10}}>
+                          <Button onClick={() => setRating(0)} variant="outline-info">Edit</Button>
+                        </div>
+                      </div>
+                    </Card.Header>
+                    <Card.Body>
+                      {(rating == 0) &&
+                      <Dropdown style={{height: 50, paddingTop: 50}} options={[1, 2, 3, 4, 5]} onChange={async (evt) => {
+                        await updateRating(evt.value);
+                        setRating(evt.value)
+                      }} value={rating} placeholder="Please provide your rating"/>}
+                      {(rating != 0) &&
+                      <div align={"center"} style={{fontSize: 20}}>
+                        {rating}
+                      </div>
+                      }
+                    </Card.Body>
+                  </Card>
+                </div>
               </div>
               <div className="col-md-4" style={{alignItems: "right"}}>
                 <div className="row" style={{padding: 5}}>
@@ -325,7 +386,8 @@ function ProductDetail(props) {
                   </div>
                   <div className="col-md-6">
                     {isEditable &&
-                    <select style={UserProfileStyles.textBoxComp} onChange={(event) => setCategory(event.target.value)}
+                    <select style={UserProfileStyles.textBoxComp}
+                            onChange={(event) => setCategory(event.target.value)}
                             required={true} readOnly={!isEditable}> {categoriesList}</select>}
                     {!isEditable &&
                     <input type="text" value={category} style={UserProfileStyles.textBoxComp} readOnly={true}/>}
@@ -336,17 +398,24 @@ function ProductDetail(props) {
                     <label>Available#</label>
                   </div>
                   <div className="col-md-6">
-                    <input style={UserProfileStyles.textBoxComp} onChange={(event) => setInventory(event.target.value)}
+                    <input style={UserProfileStyles.textBoxComp}
+                           onChange={(event) => setInventory(event.target.value)}
                            value={inventory} required={true} readOnly={!isEditable}/>
                   </div>
                 </div>
               </div>
             </div>
+            {showComments &&
+            <Comments userID={props.userID} productID={productID} hideComments={() => setShowComments(false)}/>
+            }
           </form>
         </div>
       </Modal.Body>
-
       <Modal.Footer>
+        {!showComments && <input type="submit" onClick={() => setShowComments(true)}
+                                 value="View Comments"/>}
+        {showComments && <input type="submit" onClick={() => setShowComments(false)}
+                                value="Hide Comments"/>}
         {isEditEnabled && !props.isNew && <div className={"text-start"}>
           <input type="submit" onClick={async (event) => {
             event.preventDefault()

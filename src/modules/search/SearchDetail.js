@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import tagCloud from "../../assets/images/tagCloud.png";
+import tagCloud from "../../assets/images/TagCloud.png";
 import Table from "react-bootstrap/Table";
 import UserProfileStyles from "../styles/CommonStyles";
 import CommonStyles from "../styles/CommonStyles";
@@ -102,11 +102,11 @@ function SearchDetail(props) {
 
   return (
     <div>
-      <div>
+      {/*<div>
         <img style={{height: 300, width: "80%", paddingLeft: 13, paddingTop: 10}} src={tagCloud}/>
-      </div>
+      </div>*/}
       <div style={{paddingTop: 20}}>
-        <h2 style={{fontFamily: 'cursive', color: "pink", fontSize: 40}}> Filter and find your choice..</h2>
+        <h2 style={{fontFamily: 'cursive', color: "black", fontSize: 40}}> Filter and find your choice..</h2>
         <Table striped hover>
           <tbody>
           <tr>
