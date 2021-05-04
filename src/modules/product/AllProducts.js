@@ -6,15 +6,16 @@ import Button from "react-bootstrap/Button";
 import "../styles/box.css"
 import SearchDetail from "../search/SearchDetail";
 import CommonStyles from "../styles/CommonStyles";
-import UserProfileStyles from "../styles/CommonStyles";
 import Table from "react-bootstrap/Table";
 
 function AllProducts(props) {
+  const [searchData, setSearchData] = useState({})
   const [products, setProducts] = useState([]);
   const [searchEnabled, setSearchEnabled] = useState(props.searchEnabled);
   const [stringSearchCriteria, setStringSearchCriteria] = useState(props.filterCriteria);
   const [customSearch, setCustomSearch] = useState(false);
   const [overAllRatings, setOverAllRatings] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(async () => {
     if (!customSearch) {
@@ -26,7 +27,8 @@ function AllProducts(props) {
   }, [customSearch]);
 
   const getAllProducts = async () => {
-    await fetch(`${serverURL}/products?userID=${encodeURIComponent(234234)}`)
+    setLoading(true);
+    await fetch(`${serverURL}/products?userID=${encodeURIComponent(props.userID)}`)
       .then(response => response.json())
       .then(async data => {
         if (!data.error) {
@@ -41,6 +43,7 @@ function AllProducts(props) {
         console.log(error);
         alert(error);
       });
+    setLoading(false);
   }
 
   const getOverAllRatingForProducts = async (products) => {
@@ -60,11 +63,9 @@ function AllProducts(props) {
       });
   }
 
-
   const runSearchDetail = async (searchData) => {
-    //let url = `${serverURL}/productsDetailSearch?priceMinimum=${searchData.priceMinimum}&priceMaximum=${searchData.priceMaximum}&artist=${isEmpty(searchData.artist) ? "EMPTY" : searchData.artist}&description=${isEmpty(searchData.description) ? "EMPTY" : searchData.description}&title=${isEmpty(searchData.title) ? "EMPTY" : searchData.title}&category=${isEmpty(searchData.category) ? "EMPTY" : searchData.category}&sortPriceHighToLow=${searchData.sortPriceHighToLow}&sortPriceLowToHigh=${searchData.sortPriceLowToHigh}`;
+    setLoading(true);
     let url = `${serverURL}/productsDetailSearch?priceMinimum=${searchData.priceMinimum < 0 ? 0 : searchData.priceMinimum}&priceMaximum=${searchData.priceMaximum <= 0 ? 1000000000 : searchData.priceMaximum}&artist=${searchData.artist}&description=${searchData.description}&title=${searchData.title}&category=${searchData.category}&sortPriceHighToLow=${searchData.sortPriceHighToLow}&sortPriceLowToHigh=${searchData.sortPriceLowToHigh}`;
-    console.log(url);
     await fetch(url)
       .then(response => response.json())
       .then(async (data) => {
@@ -81,9 +82,11 @@ function AllProducts(props) {
         console.log(error);
         alert(error);
       });
+    setLoading(false);
   }
 
   const searchProductsByString = async (stringSearchCriteria) => {
+    setLoading(true);
     setProducts([]);
     await fetch(`${serverURL}/productsSearchString?searchString=${encodeURIComponent(stringSearchCriteria)}`)
       .then(response => response.json())
@@ -101,10 +104,10 @@ function AllProducts(props) {
         console.log(error);
         alert(error);
       });
+    setLoading(false);
   }
 
   const renderProduct = (product, index) => {
-    console.log(overAllRatings)
     return (
       <Card style={{width: '18rem'}} className="box box1">
         <Card.Img onClick={() => props.openProductDetail(product)} style={{height: 300}} variant="top"
@@ -123,7 +126,7 @@ function AllProducts(props) {
             <tr>
               <td style={CommonStyles.prodDisplayField}>Description</td>
               <td>{product.description && (<Card.Text style={{display:"flex",justifyContent:"Center",fontFamily: "serif", color: "#459c5d", fontSize: 20}}>
-                {product.description.length > 100 ? product.description.substr(0, 75)+"..." : product.description}
+                {product.description.length > 10 ? product.description.substr(0, 10)+"..." : product.description}
               </Card.Text>)}</td>
             </tr>
             <tr>
@@ -146,17 +149,18 @@ function AllProducts(props) {
 
   return (
     <div>
-      {!isEmpty(products) && (
+      {loading &&<h2 style={{paddingBottom:1000}}>Loading... Please wait..</h2> }
+      {!loading && !isEmpty(products) && (
         <div>
           {searchEnabled && <div className="row">
             <div className="col" >
               <SearchDetail searchDetail={async (searchData) => await runSearchDetail(searchData)}
                             customSearch={(value) => {
                               setCustomSearch(value)
-                            }}/>
+                            }} searchData={searchData} setSearchData={(data) => setSearchData(data)}/>
             </div>
             <div className="col-md-8" style={{marginRight: 30}}>
-              <div className="grid">{products.map((product, index) => renderProduct(product, index))}</div>
+              <div className="grid2">{products.map((product, index) => renderProduct(product, index))}</div>
             </div>
           </div>}
           {!searchEnabled &&
@@ -164,7 +168,7 @@ function AllProducts(props) {
             (product, index) => renderProduct(product, index))}</div>}
         </div>
       )}
-      {isEmpty(products) && <h2>No Products Found</h2>}
+      {!loading && isEmpty(products) && <h2 style={{paddingBottom:1000}}>No Products Found</h2>}
     </div>
   );
 }

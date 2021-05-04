@@ -22,8 +22,6 @@ function Home(props) {
   const [refreshHome, setRefreshHome] = useState(true);
   const [enableSearch, setEnableSearch] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState("")
-  console.log("test1",enableSearch)
-
 
   const displayProfilePage = () => {
     setRefreshHome(false);
@@ -51,12 +49,12 @@ function Home(props) {
 
   return (
     <div>
-      <Navbar bg="light" expand="lg">
-        <Navbar.Brand style={{fontSize: 25}}>Art-Gallery</Navbar.Brand>
+      <Navbar style={{backgroundColor:"#27476f"}} bg="" expand="lg">
+        <Navbar.Brand style={{fontSize:30,fontWeight:"Bold",fontFamily:"cursive",color:"#ffffff"}}>Art-Gallery</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
-            <h3>Welcome back {userName} !</h3>
+            <h3 style={{paddingLeft:30,fontWeight:"bolder",fontFamily:"cursive",color:"#ffffff"}}>Welcome back {userName} !</h3>
           </Nav>
           <Form inline>
             <input style={{width: 400}} type="text" placeholder="search here: let's say Meenakari"
@@ -72,7 +70,7 @@ function Home(props) {
               setShowCart(true);
               setRefreshHome(false)
             }} variant="outline-info">Shopping Cart</Button>
-            <NavDropdown title="More options.." id="basic-nav-dropdown" style={{paddingRight: 100}}>
+            <NavDropdown title="More options.." id="basic-nav-dropdown" style={{paddingRight: 100,color:"#ffffff"}}>
               <NavDropdown.Item onClick={() => displayProfilePage()}>Profile</NavDropdown.Item>
               {userData.contributor &&
               <NavDropdown.Item onClick={() => displayNewProductModal()}>Add Product</NavDropdown.Item>}
@@ -88,7 +86,7 @@ function Home(props) {
           showProfilePage(false);
           setUserData(userData);
           setRefreshHome(true)
-        }} updateUserName={(value) => setUserName(value)}/>}
+        }} updateUserName={(value) => setUserName(value) } updateUserData={(data) => setUserData(data)}/>}
 
         {newProductDetailModal &&
         <ProductDetail userID={userData.userID} closeDetail={() => {

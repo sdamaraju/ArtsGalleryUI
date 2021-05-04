@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import signInImage from "../../assets/images/signINBack.png";
+import signInImage from "../../assets/images/pastel-background-last.jpg";
 import Home from "../home/home";
 import {isEmpty} from "../utils/util";
 import {serverURL} from "../../app.constants"
@@ -17,9 +17,17 @@ const SignIn = (props) => {
 
   //Remove this..just for test
   useEffect(() => {
-    setLoginID("sdamaraju");
-    setPassword("Password@123");
-  }, []);
+    if(!loggedIn){
+      let userSession = sessionStorage.getItem("userSession");
+      if(!isEmpty(userSession)){
+        setUserData(JSON.parse(userSession));
+        setLoggedIn(true);
+      }
+    }
+    else {
+      sessionStorage.setItem("userSession",JSON.stringify(userData));
+    }
+  }, [loggedIn]);
 
   const login = () => {
     setFailedLogIn(false);
@@ -43,16 +51,17 @@ const SignIn = (props) => {
 
   const logout = () => {
     setLoggedIn(false);
+    sessionStorage.removeItem("userSession");
     setUserData({});
   }
 
   return (
-    <div style={{
-      backgroundImage: `url(${signInImage})`,
-      backgroundSize: 'cover',
-      backgroundColor: 'pink',
-    }}>
-      <div style={{top: 1000}}>
+    <div >
+      <div>
+        {!loggedIn && <div style={{top: 1000 ,
+          backgroundImage: `url(${signInImage})`,
+          backgroundSize: 'cover',
+        }}>
         {!loggedIn && (
           <h1 style={{
             fontStyle: "",
@@ -91,25 +100,30 @@ const SignIn = (props) => {
             </label>
             <br/>
             <div>
-            <div style={{paddingBottom:10,paddingTop:10}}>
-              <Button onClick={async (event) => {
-                event.preventDefault();
-                await login();
-              }} variant="primary" style={{}}>Sign in</Button>
+              <div style={{paddingBottom: 10, paddingTop: 10}}>
+                <Button onClick={async (event) => {
+                  event.preventDefault();
+                  await login();
+                }} variant="primary" style={{}}>Sign in</Button>
               </div>
-              <div >
-              <Button onClick={() => {
-                setShowSignUpModal(true);
-              }} variant="secondary">Register</Button>
+              <div>
+                <Button onClick={() => {
+                  setShowSignUpModal(true);
+                }} variant="secondary">Register</Button>
               </div>
             </div>
           </form>
         )}
         {failedLogin && <text style={{color: "Red"}}> Username/password did not match</text>}
         {showSignUpModal && <SignUp closeSignUpModal={() => setShowSignUpModal(false)}/>}
+        <div style={{paddingTop: 1000}}></div>
+      </div>}
+      <div style={{
+        backgroundColor: "Pink",
+        backgroundSize: 'cover',}}>
         {loggedIn && <Home userData={userData} logout={() => logout()}/>}
       </div>
-      <div style={{paddingTop: 1000}}></div>
+      </div>
     </div>
   );
 }

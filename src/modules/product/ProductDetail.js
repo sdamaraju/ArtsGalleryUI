@@ -137,6 +137,7 @@ function ProductDetail(props) {
         description: description,
         ownerID: props.userID,
         category: category == "" ? productCategories[0] : category,
+        dateCreated : Date.now().toString(),
       }) : JSON.stringify({
         productID: productID,
         title: title,
@@ -267,7 +268,7 @@ function ProductDetail(props) {
   }
 
   return (
-    <Modal show={true} onHide={() => props.closeDetail()} size="lg">
+    <Modal show={true} onHide={() => props.closeDetail()} size="xl">
       <Modal.Header>
         {props.isNew && <Modal.Title>Add a Product</Modal.Title>}
         {!props.isNew && <Modal.Title>Selected Product</Modal.Title>}
@@ -339,6 +340,7 @@ function ProductDetail(props) {
                 </div>
               </div>
               <div className="col-md-4" style={{alignItems: "right"}}>
+                {inventory<=0 && <div style={{color:"RED"}}>{"Inventory unavailable"}</div>}
                 <div className="row" style={{padding: 5}}>
                   <div className="col-md-6">
                     <label>Title</label>
@@ -354,7 +356,7 @@ function ProductDetail(props) {
                     <label>Description</label>
                   </div>
                   <div className="col-md-6">
-                    <textarea rows={4} placeholder={"Description"} type="text" value={description}
+                    <textarea rows={4} style={{width:300}} placeholder={"Description"} type="text" value={description}
 
                               onChange={(event) => setDescription(event.target.value)} required={true}
                               readOnly={!isEditable}/>
@@ -365,7 +367,7 @@ function ProductDetail(props) {
                     <label>Price</label>
                   </div>
                   <div className="col-md-6">
-                    <input placeholder={"Price"} type="text" value={price}
+                    <input placeholder={"Price"} type="number" value={price}
                            style={UserProfileStyles.textBoxComp}
                            onChange={(event) => setPrice(event.target.value)} required={true} readOnly={!isEditable}/>
                   </div>
@@ -386,7 +388,7 @@ function ProductDetail(props) {
                   </div>
                   <div className="col-md-6">
                     {isEditable &&
-                    <select style={UserProfileStyles.textBoxComp}
+                    <select style={UserProfileStyles.textBoxComp} value={category}
                             onChange={(event) => setCategory(event.target.value)}
                             required={true} readOnly={!isEditable}> {categoriesList}</select>}
                     {!isEditable &&
@@ -398,7 +400,7 @@ function ProductDetail(props) {
                     <label>Available#</label>
                   </div>
                   <div className="col-md-6">
-                    <input style={UserProfileStyles.textBoxComp}
+                    <input style={UserProfileStyles.textBoxComp} type={"Number"}
                            onChange={(event) => setInventory(event.target.value)}
                            value={inventory} required={true} readOnly={!isEditable}/>
                   </div>
@@ -443,12 +445,12 @@ function ProductDetail(props) {
         {!props.isNew && (
           <div>
             <label className="mr-sm-2">Quantity:</label>
-            <input className="mr-sm-2" placeholder={"Quantity"} type="text" value={quantity}
+            <input className="mr-sm-2" placeholder={"Quantity"} type="Number" value={quantity}
                    style={{
                      width: 50, justifyContent: "center", textAlign: "center", paddingRight: 10
                    }}
                    onChange={(event) => setQuantity(event.target.value)} required={true}/>
-            <input type="submit" onClick={async (event) => {
+            <input type="submit" disabled={inventory<=0} onClick={async (event) => {
               event.preventDefault();
               await addToCart();
             }} className="profile-edit-btn" name="btnAddMore"

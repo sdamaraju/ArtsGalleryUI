@@ -25,8 +25,18 @@
   flex-wrap: wrap;
   flex-direction: row;
 }
+.grid2{
+  min-height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
 
 .grid > div {
+  flex-basis: calc(20% - 40px);
+}
+
+.grid2 > div {
   flex-basis: calc(33.33% - 40px);
 }
 

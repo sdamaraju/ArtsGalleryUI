@@ -17,12 +17,11 @@ function UserProfile(props) {
   const [photo, setPhoto] = useState(props.userData.photo)
   const [selectedFile, setSelectedFile] = useState(null);
   const [saveCalled, setSaveCalled] = useState(false);
-  const [userData, setUserData] = useState(false);
+  const [userData, setUserData] = useState({});
   const [contributor, setContributor] = useState(props.userData.contributor);
   //const [photoType,setPhotoType] = useState(""); Might have to revisit photoType for other than png photos..
 
   const saveUser = () => {
-    console.log("Hello", contributor);
     setSaveCalled(true);
     if (password !== confirmPassword) {
       alert("Password and Confirmation Password did not match");
@@ -72,6 +71,9 @@ function UserProfile(props) {
       }
       else {
         setPhoto(data.photo);
+        let userDataToPopulate = isEmpty(userData) ? props.userData : userData;
+        userDataToPopulate .photo = data.photo;
+        setUserData(userDataToPopulate);
         /*let strings = data.photo.split(",");
         let extension;
         switch (strings[0]) {//check image's extension

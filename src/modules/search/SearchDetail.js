@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import tagCloud from "../../assets/images/TagCloud.png";
 import Table from "react-bootstrap/Table";
 import UserProfileStyles from "../styles/CommonStyles";
 import CommonStyles from "../styles/CommonStyles";
@@ -7,16 +6,18 @@ import Button from "react-bootstrap/Button";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import {serverURL} from "../../app.constants";
+import {isEmpty} from "../utils/util";
 
 function SearchDetail(props) {
-  const [priceMaximum, setPriceMaximum] = useState(0);
-  const [priceMinimum, setPriceMinimum] = useState(0);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [artist, setArtist] = useState("");
-  const [sortPriceHighToLow, setSortPriceHighToLow] = useState(false);
-  const [sortPriceLowToHigh, setSortPriceLowToHigh] = useState(false);
+  const [searchData, setSearchData] = useState(props.searchData);
+  const [priceMaximum, setPriceMaximum] = useState(isEmpty(searchData) ? 0 : searchData.priceMaximum);
+  const [priceMinimum, setPriceMinimum] = useState(isEmpty(searchData) ? 0 : searchData.priceMinimum);
+  const [title, setTitle] = useState(isEmpty(searchData) ? "" : searchData.title);
+  const [description, setDescription] = useState(isEmpty(searchData) ? "" : searchData.description);
+  const [category, setCategory] = useState(isEmpty(searchData) ? "" : searchData.category);
+  const [artist, setArtist] = useState(isEmpty(searchData) ? "" : searchData.artist);
+  const [sortPriceHighToLow, setSortPriceHighToLow] = useState(isEmpty(searchData) ? false : searchData.sortPriceHighToLow);
+  const [sortPriceLowToHigh, setSortPriceLowToHigh] = useState(isEmpty(searchData) ? false : searchData.sortPriceLowToHigh);
   const [availableArtists, setAvailableArtists] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
   const [stale, setStale] = useState(true);
@@ -40,7 +41,7 @@ function SearchDetail(props) {
       sortPriceLowToHigh:sortPriceLowToHigh,
       sortPriceHighToLow:sortPriceHighToLow,
     }))
-    console.log(searchData)
+    setSearchData(searchData);
     return searchData;
   }
 
@@ -85,7 +86,7 @@ function SearchDetail(props) {
   const search = async ()=> {
     //transformPrices();
     let searchData = buildSearchData();
-    console.log(searchData)
+    props.setSearchData(searchData);
     props.customSearch(true);
     props.searchDetail(searchData);
   }

@@ -28,9 +28,10 @@ function SignUp(props) {
       body: JSON.stringify({
         userName: userName,
         password: password,
-        phone: phone,
+        phoneNumber: phone,
         email: email,
         loginID: loginID,
+        contributor:contributor,
       })
     };
     await fetch(`${serverURL}/user`, requestOptions)
@@ -140,7 +141,9 @@ function SignUp(props) {
                   <div className="col-md-6">
                     <input  type="checkbox" value={contributor}
                             style={UserProfileStyles.checkBoxComp}
-                           onChange={(event) => setContributor(event.target.value)}
+                           onChange={(event) => {
+                             setContributor(!contributor)
+                           }}
                            required={true}/>
                   </div>
                 </div>
